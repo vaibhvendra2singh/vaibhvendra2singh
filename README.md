@@ -11,10 +11,10 @@ B.Tech Cybersecurity student at Bennett University, focused on Software Developm
 <a href="YOUR_LINKEDIN_URL">
 <img src="https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white">
 </a>
-<a href="YOUR_LEETCODE_URL">
+<a href="https://leetcode.com/u/singh_2vaibhvendra/">
 <img src="https://img.shields.io/badge/LeetCode-FFA116?style=for-the-badge&logo=leetcode&logoColor=white">
 </a>
-<a href="YOUR_INSTAGRAM_URL">
+<a href="https://www.instagram.com/singh2_krishna/">
 <img src="https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white">
 </a>
 </p>
