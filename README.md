@@ -4,7 +4,7 @@
 
 ### Cybersecurity Student · Software Developer · DSA Enthusiast
 
-B.Tech in Cybersecurity at Bennett University, focused on software development, data structures & algorithms, cybersecurity, systems & network security, and applied AI/ML.
+B.Tech Cybersecurity student at Bennett University with a focus on **software engineering, Data Structures & Algorithms, cybersecurity, Linux, networking, and applied AI/ML**. Building strong foundations in problem solving, secure systems, and practical engineering.
 
 <p>
 <a href="https://github.com/vaibhvendra2singh">
@@ -30,7 +30,11 @@ B.Tech in Cybersecurity at Bennett University, focused on software development, 
 
 ## About
 
-Cybersecurity student focused on **software development, Data Structures & Algorithms, Linux, networking, system security, and AI/ML**.
+Cybersecurity student focused on **software engineering, Data Structures & Algorithms, Linux, networking, system security, and AI/ML**.
+
+### Core Focus
+
+**Software Engineering** · **DSA & Problem Solving** · **Cybersecurity** · **Linux & Networking** · **System & Network Security** · **AI/ML**
 
 ---
 
@@ -79,14 +83,26 @@ Cybersecurity student focused on **software development, Data Structures & Algor
 
 ---
 
+## Coding Profiles
+
+<p align="center">
+<a href="https://leetcode.com/u/singh_2vaibhvendra/">
+<img src="https://img.shields.io/badge/LeetCode-Profile-FFA116?style=for-the-badge&logo=leetcode&logoColor=white">
+</a>
+<a href="https://www.naukri.com/code360/profile/vaibhvendra">
+<img src="https://img.shields.io/badge/Code360-Profile-0A66C2?style=for-the-badge&logo=codingninjas&logoColor=white">
+</a>
+</p>
+
+---
+
 ## Connect
 
 <p align="center">
 <a href="https://github.com/vaibhvendra2singh">GitHub</a> ·
 <a href="https://www.linkedin.com/in/vaibhvendra-singh-302642322/">LinkedIn</a> ·
 <a href="https://leetcode.com/u/singh_2vaibhvendra/">LeetCode</a> ·
-<a href="https://www.naukri.com/code360/profile/vaibhvendra">Code360</a> ·
-<a href="https://www.instagram.com/singh2_krishna/">Instagram</a>
+<a href="https://www.naukri.com/code360/profile/vaibhvendra">Code360</a>
 </p>
 
 <div align="center">
