@@ -5,7 +5,7 @@
 
 <rect x="40" y="100" width="250" height="85" rx="12" fill="#0d1117" stroke="#30363d"/>
 <text x="60" y="128" fill="#8b949e" font-family="Arial, sans-serif" font-size="13">Contributions · last 365 days</text>
-<text x="60" y="162" fill="#f0f6fc" font-family="Arial, sans-serif" font-size="30" font-weight="700">150</text>
+<text x="60" y="162" fill="#f0f6fc" font-family="Arial, sans-serif" font-size="30" font-weight="700">151</text>
 
 <rect x="325" y="100" width="250" height="85" rx="12" fill="#0d1117" stroke="#30363d"/>
 <text x="345" y="128" fill="#8b949e" font-family="Arial, sans-serif" font-size="13">Current streak</text>
