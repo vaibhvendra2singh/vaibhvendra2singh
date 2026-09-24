@@ -41,3 +41,5 @@ jobs:
             git commit -m "chore: update Code360 stats"
             git push
           fi
+          
+          # Direct API sync; generated SVG keeps README lightweight.
