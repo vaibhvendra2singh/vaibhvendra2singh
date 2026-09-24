@@ -1,143 +1,275 @@
 import html
 import json
 import re
-import urllib.parse
-import urllib.request
 from datetime import datetime, timezone
+from pathlib import Path
+from playwright.sync_api import sync_playwright
 
-PROFILE = "vaibhendra"
 PROFILE_URL = "https://www.naukri.com/code360/profile/vaibhendra"
-API_BASE = "https://www.naukri.com/code360/api/v3/public_section"
 START = "<!-- CODE360:START -->"
 END = "<!-- CODE360:END -->"
-SVG_PATH = "assets/code360-stats.svg"
+SVG_PATH = Path("assets/code360-stats.svg")
 
-HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/153.0.0.0 Safari/537.36"
-    ),
-    "Accept": "application/json, text/plain, */*",
-    "Accept-Language": "en-US,en;q=0.9",
-    "Referer": PROFILE_URL,
-}
+API_RESPONSES = []
 
-def get_json(path, params):
-    query = urllib.parse.urlencode(params)
-    url = f"{API_BASE}/{path}?{query}"
-    req = urllib.request.Request(url, headers=HEADERS, method="GET")
-    with urllib.request.urlopen(req, timeout=30) as response:
-        if response.status != 200:
-            raise RuntimeError(f"Code360 API returned HTTP {response.status}: {url}")
-        return json.loads(response.read().decode("utf-8"))
-
-def number(value):
+def to_int(value):
     if isinstance(value, bool):
         return None
     if isinstance(value, (int, float)):
         return int(value)
     if isinstance(value, str):
-        m = re.search(r"\b(\d+)\b", value.replace(",", ""))
-        return int(m.group(1)) if m else None
+        m = re.search(r"\b(\d[\d,]*)\b", value.replace(",", ""))
+        return int(m.group(1).replace(",", "")) if m else None
     return None
 
-def find_number(obj, wanted_keys):
+def walk(obj):
     if isinstance(obj, dict):
-        for key, value in obj.items():
-            key_l = key.lower()
-            if any(w in key_l for w in wanted_keys):
-                n = number(value)
-                if n is not None:
-                    return n
-            found = find_number(value, wanted_keys)
-            if found is not None:
-                return found
+        for k, v in obj.items():
+            yield k, v
+            yield from walk(v)
     elif isinstance(obj, list):
-        for value in obj:
-            found = find_number(value, wanted_keys)
-            if found is not None:
-                return found
+        for v in obj:
+            yield from walk(v)
+
+def first_number(obj, keys):
+    for key, value in walk(obj):
+        lk = key.lower()
+        if any(token in lk for token in keys):
+            n = to_int(value)
+            if n is not None:
+                return n
     return None
 
-profile_payload = get_json(
-    "profile/user_details",
-    {
-        "uuid": PROFILE,
-        "app_context": "publicsection",
-        "naukri_request": "true",
-        "request_differentiator": int(datetime.now().timestamp() * 1000),
-    },
-)
+def regex_number(text, patterns):
+    for pattern in patterns:
+        m = re.search(pattern, text, re.I)
+        if m:
+            try:
+                return int(m.group(1).replace(",", ""))
+            except (ValueError, IndexError):
+                pass
+    return None
 
-profile_data = profile_payload.get("data") or {}
-uuid = profile_data.get("uuid")
-if not uuid:
-    raise RuntimeError("Code360 did not return a profile UUID.")
+def get_stats_from_json(data):
+    # Code360 profile payload
+    stats_block = (
+        data.get("data", {})
+        if isinstance(data, dict)
+        else {}
+    )
 
-stats = profile_data.get("dsa_domain_data", {}).get("problem_count_data", {})
-solved = number(stats.get("total_count"))
-easy = number(stats.get("easy_count"))
+    solved = None
+    easy = None
+    medium = None
+    hard = None
 
-streak_payload = get_json(
-    "streaks/fetch_curr_and_long_streak",
-    {
-        "uuid": uuid,
-        "app_context": "publicsection",
-        "naukri_request": "true",
-        "request_differentiator": int(datetime.now().timestamp() * 1000),
-    },
-)
-streak_data = streak_payload.get("data") or {}
+    # Search all nested objects for problem-count fields.
+    for key, value in walk(stats_block):
+        if key == "problem_count_data" and isinstance(value, dict):
+            solved = solved or to_int(value.get("total_count"))
+            easy = easy or to_int(value.get("easy_count"))
+            medium = medium or to_int(value.get("medium_count"))
+            hard = hard or to_int(value.get("hard_count"))
 
-current_streak = find_number(
-    streak_data,
-    ["current_streak", "currentstreak", "curr_streak", "current"],
-)
-longest_streak = find_number(
-    streak_data,
-    ["longest_streak", "longeststreak", "long_streak", "longest"],
-)
+    solved = solved or first_number(
+        data,
+        ["total_count", "problems_solved", "totalproblemsolved", "solved_count"],
+    )
 
-if solved is None:
-    solved = find_number(profile_data, ["total_count", "problems_solved", "solved_count"])
+    submissions = first_number(
+        data,
+        ["submission_count", "submissions", "total_submission", "total_submissions"],
+    )
+    coding = first_number(
+        data,
+        ["coding_count", "coding_problems", "coding"],
+    )
+    mcq = first_number(
+        data,
+        ["mcq_count", "mcq_problems", "mcq"],
+    )
+    current = first_number(
+        data,
+        ["current_streak", "currentstreak", "curr_streak"],
+    )
+    longest = first_number(
+        data,
+        ["longest_streak", "longeststreak", "long_streak"],
+    )
 
-if solved is None:
-    raise RuntimeError("Code360 API returned profile data, but no solved-count field was found.")
+    # Avoid interpreting generic "coding" fields such as coding score.
+    if coding is not None and coding > 20000:
+        coding = None
 
-current_streak = current_streak if current_streak is not None else 0
-longest_streak = longest_streak if longest_streak is not None else 0
+    return {
+        "solved": solved,
+        "easy": easy,
+        "medium": medium,
+        "hard": hard,
+        "submissions": submissions,
+        "coding": coding,
+        "mcq": mcq,
+        "current_streak": current,
+        "longest_streak": longest,
+    }
+
+with sync_playwright() as p:
+    browser = p.chromium.launch(headless=True)
+    context = browser.new_context(
+        viewport={"width": 1440, "height": 1800},
+        user_agent=(
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/153.0.0.0 Safari/537.36"
+        ),
+        locale="en-US",
+    )
+    page = context.new_page()
+
+    def capture(response):
+        url = response.url
+        if "naukri.com" not in url.lower():
+            return
+        if "/api/" not in url.lower():
+            return
+        try:
+            ct = response.headers.get("content-type", "")
+            if "json" not in ct.lower():
+                return
+            raw = response.text()
+            if raw and len(raw) < 5_000_000:
+                API_RESPONSES.append((url, raw))
+        except Exception:
+            pass
+
+    page.on("response", capture)
+
+    page.goto(PROFILE_URL, wait_until="domcontentloaded", timeout=120000)
+    page.wait_for_timeout(7000)
+
+    # Trigger lazy-loaded profile sections.
+    for _ in range(5):
+        page.mouse.wheel(0, 1500)
+        page.wait_for_timeout(1200)
+
+    body_text = page.locator("body").inner_text()
+    html_source = page.content()
+    final_url = page.url
+    title = page.title()
+
+    browser.close()
+
+stats = {
+    "solved": None,
+    "easy": None,
+    "medium": None,
+    "hard": None,
+    "submissions": None,
+    "coding": None,
+    "mcq": None,
+    "current_streak": None,
+    "longest_streak": None,
+}
+
+for url, raw in API_RESPONSES:
+    try:
+        data = json.loads(raw)
+    except Exception:
+        continue
+
+    found = get_stats_from_json(data)
+    for key, value in found.items():
+        if stats[key] is None and value is not None:
+            stats[key] = value
+
+# Rendered page fallback.
+if stats["submissions"] is None:
+    stats["submissions"] = regex_number(
+        body_text,
+        [r"(\d[\d,]*)\s+Problem submissions"],
+    )
+
+if stats["coding"] is None:
+    stats["coding"] = regex_number(
+        body_text,
+        [r"Coding\s*\((\d+)\)"],
+    )
+
+if stats["mcq"] is None:
+    stats["mcq"] = regex_number(
+        body_text,
+        [r"MCQ\s*\((\d+)\)"],
+    )
+
+if stats["current_streak"] is None:
+    stats["current_streak"] = regex_number(
+        body_text,
+        [r"Current streak:\s*(\d+)\s*days?"],
+    )
+
+if stats["longest_streak"] is None:
+    stats["longest_streak"] = regex_number(
+        body_text,
+        [r"Longest streak:\s*(\d+)\s*days?"],
+    )
+
+if stats["solved"] is None:
+    stats["solved"] = regex_number(
+        html_source,
+        [
+            r'"total_count"\s*:\s*(\d+)',
+            r'"totalCount"\s*:\s*(\d+)',
+        ],
+    )
+
+print(f"Final URL: {final_url}")
+print(f"Title: {title}")
+print(f"Captured API responses: {len(API_RESPONSES)}")
+print(f"Code360 stats: {stats}")
+
+if all(
+    stats[k] is None
+    for k in ("submissions", "coding", "mcq", "current_streak", "longest_streak", "solved")
+):
+    print("Relevant API URLs captured:")
+    for url, _ in API_RESPONSES[-30:]:
+        print(url)
+    raise RuntimeError("Could not extract Code360 statistics.")
+
 updated = datetime.now(timezone.utc).strftime("%d %b %Y %H:%M UTC")
 
-def esc(value):
-    return html.escape(str(value), quote=True)
+def val(key):
+    return stats[key] if stats[key] is not None else "—"
 
-svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="920" height="210" viewBox="0 0 920 210">
-  <rect width="920" height="210" rx="18" fill="#0d1117" stroke="#30363d"/>
+SVG_PATH.parent.mkdir(parents=True, exist_ok=True)
+
+svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="920" height="230" viewBox="0 0 920 230">
+  <rect width="920" height="230" rx="18" fill="#0d1117" stroke="#30363d"/>
   <text x="40" y="48" fill="#f0f6fc" font-family="Arial,Helvetica,sans-serif" font-size="28" font-weight="700">Code360</text>
-  <text x="40" y="78" fill="#8b949e" font-family="Arial,Helvetica,sans-serif" font-size="14">Live coding profile • automatically synced</text>
+  <text x="40" y="76" fill="#8b949e" font-family="Arial,Helvetica,sans-serif" font-size="14">Live coding activity</text>
 
-  <text x="55" y="130" fill="#f0f6fc" font-family="Arial,Helvetica,sans-serif" font-size="30" font-weight="700">{esc(solved)}</text>
-  <text x="55" y="156" fill="#8b949e" font-family="Arial,Helvetica,sans-serif" font-size="13">Problems solved</text>
+  <text x="55" y="124" fill="#f0f6fc" font-family="Arial,Helvetica,sans-serif" font-size="30" font-weight="700">{html.escape(str(val("submissions")))}</text>
+  <text x="55" y="150" fill="#8b949e" font-family="Arial,Helvetica,sans-serif" font-size="13">Submissions</text>
 
-  <text x="280" y="130" fill="#f0f6fc" font-family="Arial,Helvetica,sans-serif" font-size="30" font-weight="700">{esc(current_streak)}</text>
-  <text x="280" y="156" fill="#8b949e" font-family="Arial,Helvetica,sans-serif" font-size="13">Current streak</text>
+  <text x="255" y="124" fill="#f0f6fc" font-family="Arial,Helvetica,sans-serif" font-size="30" font-weight="700">{html.escape(str(val("coding")))}</text>
+  <text x="255" y="150" fill="#8b949e" font-family="Arial,Helvetica,sans-serif" font-size="13">Coding</text>
 
-  <text x="505" y="130" fill="#f0f6fc" font-family="Arial,Helvetica,sans-serif" font-size="30" font-weight="700">{esc(longest_streak)}</text>
-  <text x="505" y="156" fill="#8b949e" font-family="Arial,Helvetica,sans-serif" font-size="13">Longest streak</text>
+  <text x="415" y="124" fill="#f0f6fc" font-family="Arial,Helvetica,sans-serif" font-size="30" font-weight="700">{html.escape(str(val("mcq")))}</text>
+  <text x="415" y="150" fill="#8b949e" font-family="Arial,Helvetica,sans-serif" font-size="13">MCQ</text>
 
-  <text x="735" y="130" fill="#f0f6fc" font-family="Arial,Helvetica,sans-serif" font-size="30" font-weight="700">{esc(easy if easy is not None else "—")}</text>
-  <text x="735" y="156" fill="#8b949e" font-family="Arial,Helvetica,sans-serif" font-size="13">Easy</text>
+  <text x="555" y="124" fill="#f0f6fc" font-family="Arial,Helvetica,sans-serif" font-size="30" font-weight="700">{html.escape(str(val("current_streak")))}</text>
+  <text x="555" y="150" fill="#8b949e" font-family="Arial,Helvetica,sans-serif" font-size="13">Current streak</text>
 
-  <text x="40" y="190" fill="#6e7681" font-family="Arial,Helvetica,sans-serif" font-size="11">Last synced: {esc(updated)}</text>
-</svg>
-'''
+  <text x="745" y="124" fill="#f0f6fc" font-family="Arial,Helvetica,sans-serif" font-size="30" font-weight="700">{html.escape(str(val("longest_streak")))}</text>
+  <text x="745" y="150" fill="#8b949e" font-family="Arial,Helvetica,sans-serif" font-size="13">Longest streak</text>
 
-with open(SVG_PATH, "w", encoding="utf-8") as f:
-    f.write(svg)
+  <text x="40" y="198" fill="#6e7681" font-family="Arial,Helvetica,sans-serif" font-size="11">Last synced: {html.escape(updated)}</text>
+</svg>'''
 
-with open("README.md", "r", encoding="utf-8") as f:
-    readme = f.read()
+SVG_PATH.write_text(svg, encoding="utf-8")
+
+readme_path = Path("README.md")
+readme = readme_path.read_text(encoding="utf-8")
 
 pattern = re.escape(START) + r".*?" + re.escape(END)
 section = f'''## Code360
@@ -157,12 +289,7 @@ section = f'''## Code360
 if not re.search(pattern, readme, re.DOTALL):
     raise RuntimeError("Code360 markers were not found in README.md")
 
-new_readme = re.sub(pattern, section.strip(), readme, count=1, flags=re.DOTALL)
+readme = re.sub(pattern, section.strip(), readme, count=1, flags=re.DOTALL)
+readme_path.write_text(readme, encoding="utf-8")
 
-with open("README.md", "w", encoding="utf-8") as f:
-    f.write(new_readme)
-
-print(
-    f"Code360 synced: solved={solved}, current_streak={current_streak}, "
-    f"longest_streak={longest_streak}, easy={easy}"
-)
+print(f"Successfully synced Code360 stats at {updated}.")
