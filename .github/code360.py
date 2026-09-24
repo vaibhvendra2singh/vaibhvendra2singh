@@ -1,52 +1,36 @@
+import html
 import json
 import re
+import urllib.parse
+import urllib.request
 from datetime import datetime, timezone
-from playwright.sync_api import sync_playwright
 
-URL = "https://www.naukri.com/code360/profile/vaibhendra"
+PROFILE = "vaibhendra"
+PROFILE_URL = "https://www.naukri.com/code360/profile/vaibhendra"
+API_BASE = "https://www.naukri.com/code360/api/v3/public_section"
 START = "<!-- CODE360:START -->"
 END = "<!-- CODE360:END -->"
+SVG_PATH = "assets/code360-stats.svg"
 
-responses = []
+HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/153.0.0.0 Safari/537.36"
+    ),
+    "Accept": "application/json, text/plain, */*",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Referer": PROFILE_URL,
+}
 
-with sync_playwright() as p:
-    browser = p.chromium.launch(headless=True)
-    page = browser.new_page(
-        viewport={"width": 1440, "height": 1600},
-        user_agent=(
-            "Mozilla/5.0 (X11; Linux x86_64) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/153.0.0.0 Safari/537.36"
-        ),
-    )
-
-    def capture(response):
-        url = response.url
-        if not any(x in url.lower() for x in ("api", "graphql", "code360", "codingninjas", "profile")):
-            return
-        try:
-            ct = response.headers.get("content-type", "")
-            if "json" in ct:
-                body = response.text()
-                if len(body) < 2_000_000:
-                    responses.append((url, body))
-        except Exception:
-            pass
-
-    page.on("response", capture)
-
-    page.goto(URL, wait_until="domcontentloaded", timeout=120000)
-    page.wait_for_timeout(10000)
-
-    for _ in range(4):
-        page.mouse.wheel(0, 1800)
-        page.wait_for_timeout(1500)
-
-    body_text = page.locator("body").inner_text()
-    final_url = page.url
-    title = page.title()
-
-    browser.close()
+def get_json(path, params):
+    query = urllib.parse.urlencode(params)
+    url = f"{API_BASE}/{path}?{query}"
+    req = urllib.request.Request(url, headers=HEADERS, method="GET")
+    with urllib.request.urlopen(req, timeout=30) as response:
+        if response.status != 200:
+            raise RuntimeError(f"Code360 API returned HTTP {response.status}: {url}")
+        return json.loads(response.read().decode("utf-8"))
 
 def number(value):
     if isinstance(value, bool):
@@ -58,109 +42,118 @@ def number(value):
         return int(m.group(1)) if m else None
     return None
 
-def walk(obj, path=""):
-    found = []
+def find_number(obj, wanted_keys):
     if isinstance(obj, dict):
-        for k, v in obj.items():
-            p = f"{path}.{k}" if path else k
-            lk = k.lower()
-            if any(x in lk for x in ("submission", "coding", "mcq", "streak")):
-                n = number(v)
+        for key, value in obj.items():
+            key_l = key.lower()
+            if any(w in key_l for w in wanted_keys):
+                n = number(value)
                 if n is not None:
-                    found.append((k, n, p))
-            found.extend(walk(v, p))
+                    return n
+            found = find_number(value, wanted_keys)
+            if found is not None:
+                return found
     elif isinstance(obj, list):
-        for i, v in enumerate(obj):
-            found.extend(walk(v, f"{path}[{i}]"))
-    return found
-
-values = []
-for url, raw in responses:
-    try:
-        data = json.loads(raw)
-        values.extend((k, n, p, url) for k, n, p in walk(data))
-    except Exception:
-        continue
-
-def pick(keys):
-    for wanted in keys:
-        for k, n, p, url in values:
-            if wanted.lower() in k.lower():
-                return n
+        for value in obj:
+            found = find_number(value, wanted_keys)
+            if found is not None:
+                return found
     return None
 
-submissions = pick(("totalSubmission", "problemSubmission", "submissions", "submissionCount"))
-coding_count = pick(("codingProblem", "codingProblems", "codingCount"))
-mcq_count = pick(("mcqProblem", "mcqProblems", "mcqCount"))
-longest_streak = pick(("longestStreak", "maxStreak"))
+profile_payload = get_json(
+    "profile/user_details",
+    {
+        "uuid": PROFILE,
+        "app_context": "publicsection",
+        "naukri_request": "true",
+        "request_differentiator": int(datetime.now().timestamp() * 1000),
+    },
+)
 
-if submissions is None:
-    m = re.search(r"(\d[\d,]*)\s+Problem submissions", body_text, re.I)
-    if m:
-        submissions = int(m.group(1).replace(",", ""))
+profile_data = profile_payload.get("data") or {}
+uuid = profile_data.get("uuid")
+if not uuid:
+    raise RuntimeError("Code360 did not return a profile UUID.")
 
-if coding_count is None:
-    m = re.search(r"Coding\s*\((\d+)\)", body_text, re.I)
-    if m:
-        coding_count = int(m.group(1))
+stats = profile_data.get("dsa_domain_data", {}).get("problem_count_data", {})
+solved = number(stats.get("total_count"))
+easy = number(stats.get("easy_count"))
 
-if mcq_count is None:
-    m = re.search(r"MCQ\s*\((\d+)\)", body_text, re.I)
-    if m:
-        mcq_count = int(m.group(1))
+streak_payload = get_json(
+    "streaks/fetch_curr_and_long_streak",
+    {
+        "uuid": uuid,
+        "app_context": "publicsection",
+        "naukri_request": "true",
+        "request_differentiator": int(datetime.now().timestamp() * 1000),
+    },
+)
+streak_data = streak_payload.get("data") or {}
 
-if longest_streak is None:
-    m = re.search(r"Longest streak:\s*(\d+)\s*days", body_text, re.I)
-    if m:
-        longest_streak = int(m.group(1))
+current_streak = find_number(
+    streak_data,
+    ["current_streak", "currentstreak", "curr_streak", "current"],
+)
+longest_streak = find_number(
+    streak_data,
+    ["longest_streak", "longeststreak", "long_streak", "longest"],
+)
 
-print(f"Code360 final URL: {final_url}")
-print(f"Code360 title: {title}")
-print(f"Captured JSON responses: {len(responses)}")
-print(f"Extracted: submissions={submissions}, coding={coding_count}, mcq={mcq_count}, longest_streak={longest_streak}")
+if solved is None:
+    solved = find_number(profile_data, ["total_count", "problems_solved", "solved_count"])
 
-if submissions is None and coding_count is None and mcq_count is None:
-    print("No Code360 stats found. Recent relevant API URLs:")
-    for url, _ in responses[-20:]:
-        print(url)
-    raise RuntimeError("Could not read Code360 statistics from the public profile.")
+if solved is None:
+    raise RuntimeError("Code360 API returned profile data, but no solved-count field was found.")
 
-updated = datetime.now(timezone.utc).strftime("%d %b %Y")
+current_streak = current_streak if current_streak is not None else 0
+longest_streak = longest_streak if longest_streak is not None else 0
+updated = datetime.now(timezone.utc).strftime("%d %b %Y %H:%M UTC")
 
-stats = []
-if submissions is not None:
-    stats.append(f"<strong>{submissions}</strong> submissions")
-if coding_count is not None:
-    stats.append(f"<strong>{coding_count}</strong> coding")
-if mcq_count is not None:
-    stats.append(f"<strong>{mcq_count}</strong> MCQ")
-if longest_streak is not None:
-    stats.append(f"<strong>{longest_streak}</strong>-day longest streak")
+def esc(value):
+    return html.escape(str(value), quote=True)
 
-section = f"""## Code360
+svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="920" height="210" viewBox="0 0 920 210">
+  <rect width="920" height="210" rx="18" fill="#0d1117" stroke="#30363d"/>
+  <text x="40" y="48" fill="#f0f6fc" font-family="Arial,Helvetica,sans-serif" font-size="28" font-weight="700">Code360</text>
+  <text x="40" y="78" fill="#8b949e" font-family="Arial,Helvetica,sans-serif" font-size="14">Live coding profile • automatically synced</text>
 
-{START}
+  <text x="55" y="130" fill="#f0f6fc" font-family="Arial,Helvetica,sans-serif" font-size="30" font-weight="700">{esc(solved)}</text>
+  <text x="55" y="156" fill="#8b949e" font-family="Arial,Helvetica,sans-serif" font-size="13">Problems solved</text>
 
-<p align="center">
+  <text x="280" y="130" fill="#f0f6fc" font-family="Arial,Helvetica,sans-serif" font-size="30" font-weight="700">{esc(current_streak)}</text>
+  <text x="280" y="156" fill="#8b949e" font-family="Arial,Helvetica,sans-serif" font-size="13">Current streak</text>
 
-{' &nbsp; · &nbsp; '.join(stats)}
+  <text x="505" y="130" fill="#f0f6fc" font-family="Arial,Helvetica,sans-serif" font-size="30" font-weight="700">{esc(longest_streak)}</text>
+  <text x="505" y="156" fill="#8b949e" font-family="Arial,Helvetica,sans-serif" font-size="13">Longest streak</text>
 
-<br><sub>Last synced: {updated} UTC</sub>
+  <text x="735" y="130" fill="#f0f6fc" font-family="Arial,Helvetica,sans-serif" font-size="30" font-weight="700">{esc(easy if easy is not None else "—")}</text>
+  <text x="735" y="156" fill="#8b949e" font-family="Arial,Helvetica,sans-serif" font-size="13">Easy</text>
 
-</p>
+  <text x="40" y="190" fill="#6e7681" font-family="Arial,Helvetica,sans-serif" font-size="11">Last synced: {esc(updated)}</text>
+</svg>
+'''
 
-<p align="center">
-<a href="{URL}">
-<img src="https://img.shields.io/badge/Code360-View%20Profile-2F80ED?style=for-the-badge">
-</a>
-</p>
-
-{END}"""
+with open(SVG_PATH, "w", encoding="utf-8") as f:
+    f.write(svg)
 
 with open("README.md", "r", encoding="utf-8") as f:
     readme = f.read()
 
 pattern = re.escape(START) + r".*?" + re.escape(END)
+section = f'''## Code360
+
+{START}
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/vaibhvendra2singh/vaibhvendra2singh/main/{SVG_PATH}" alt="Code360 live statistics" />
+</p>
+
+<p align="center">
+  <a href="{PROFILE_URL}">View Code360 Profile →</a>
+</p>
+
+{END}'''
+
 if not re.search(pattern, readme, re.DOTALL):
     raise RuntimeError("Code360 markers were not found in README.md")
 
@@ -168,3 +161,8 @@ new_readme = re.sub(pattern, section.strip(), readme, count=1, flags=re.DOTALL)
 
 with open("README.md", "w", encoding="utf-8") as f:
     f.write(new_readme)
+
+print(
+    f"Code360 synced: solved={solved}, current_streak={current_streak}, "
+    f"longest_streak={longest_streak}, easy={easy}"
+)
