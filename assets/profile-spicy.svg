@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="320" viewBox="0 0 1200 320">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#020617"/><stop offset=".5" stop-color="#0b1020"/><stop offset="1" stop-color="#020617"/></linearGradient>
+<linearGradient id="neon" x1="0" x2="1"><stop stop-color="#00f0ff"/><stop offset=".5" stop-color="#7c3aed"/><stop offset="1" stop-color="#ff00aa"/></linearGradient>
+<filter id="glow"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+<pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" stroke="#00e5ff" stroke-opacity=".09"/></pattern>
+<clipPath id="c"><rect width="1200" height="320" rx="20"/></clipPath>
+</defs>
+<rect width="1200" height="320" rx="20" fill="url(#bg)"/>
+<rect width="1200" height="320" rx="20" fill="url(#grid)"/>
+
+<!-- moving neon waves -->
+<g fill="none" filter="url(#glow)">
+<path d="M-50 245 C150 80 300 310 500 135 S850 35 1250 205" stroke="#00e5ff" stroke-width="2" opacity=".5">
+<animate attributeName="d" dur="5s" repeatCount="indefinite" values="M-50 245 C150 80 300 310 500 135 S850 35 1250 205;M-50 190 C170 320 320 60 530 205 S900 280 1250 90;M-50 245 C150 80 300 310 500 135 S850 35 1250 205"/>
+</path>
+<path d="M-50 85 C180 270 330 30 570 175 S920 300 1250 100" stroke="#a855f7" stroke-width="2" opacity=".4">
+<animate attributeName="d" dur="7s" repeatCount="indefinite" values="M-50 85 C180 270 330 30 570 175 S920 300 1250 100;M-50 150 C180 20 340 300 570 100 S950 30 1250 210;M-50 85 C180 270 330 30 570 175 S920 300 1250 100"/>
+</path>
+</g>
+
+<!-- floating particles -->
+<g fill="#00e5ff" filter="url(#glow)">
+<circle cx="35" cy="35" r="2"><animate attributeName="cy" values="35;0;35" dur="3s" repeatCount="indefinite"/><animate attributeName="opacity" values=".15;.9;.15" dur="2s" repeatCount="indefinite"/></circle><circle cx="102" cy="118" r="3"><animate attributeName="cy" values="118;83;118" dur="4s" repeatCount="indefinite"/><animate attributeName="opacity" values=".15;.9;.15" dur="3s" repeatCount="indefinite"/></circle><circle cx="169" cy="201" r="4"><animate attributeName="cy" values="201;166;201" dur="5s" repeatCount="indefinite"/><animate attributeName="opacity" values=".15;.9;.15" dur="4s" repeatCount="indefinite"/></circle><circle cx="236" cy="39" r="2"><animate attributeName="cy" values="39;4;39" dur="6s" repeatCount="indefinite"/><animate attributeName="opacity" values=".15;.9;.15" dur="5s" repeatCount="indefinite"/></circle><circle cx="303" cy="122" r="3"><animate attributeName="cy" values="122;87;122" dur="7s" repeatCount="indefinite"/><animate attributeName="opacity" values=".15;.9;.15" dur="2s" repeatCount="indefinite"/></circle><circle cx="370" cy="205" r="4"><animate attributeName="cy" values="205;170;205" dur="3s" repeatCount="indefinite"/><animate attributeName="opacity" values=".15;.9;.15" dur="3s" repeatCount="indefinite"/></circle><circle cx="437" cy="43" r="2"><animate attributeName="cy" values="43;8;43" dur="4s" repeatCount="indefinite"/><animate attributeName="opacity" values=".15;.9;.15" dur="4s" repeatCount="indefinite"/></circle><circle cx="504" cy="126" r="3"><animate attributeName="cy" values="126;91;126" dur="5s" repeatCount="indefinite"/><animate attributeName="opacity" values=".15;.9;.15" dur="5s" repeatCount="indefinite"/></circle><circle cx="571" cy="209" r="4"><animate attributeName="cy" values="209;174;209" dur="6s" repeatCount="indefinite"/><animate attributeName="opacity" values=".15;.9;.15" dur="2s" repeatCount="indefinite"/></circle><circle cx="638" cy="47" r="2"><animate attributeName="cy" values="47;12;47" dur="7s" repeatCount="indefinite"/><animate attributeName="opacity" values=".15;.9;.15" dur="3s" repeatCount="indefinite"/></circle><circle cx="705" cy="130" r="3"><animate attributeName="cy" values="130;95;130" dur="3s" repeatCount="indefinite"/><animate attributeName="opacity" values=".15;.9;.15" dur="4s" repeatCount="indefinite"/></circle><circle cx="772" cy="213" r="4"><animate attributeName="cy" values="213;178;213" dur="4s" repeatCount="indefinite"/><animate attributeName="opacity" values=".15;.9;.15" dur="5s" repeatCount="indefinite"/></circle><circle cx="839" cy="51" r="2"><animate attributeName="cy" values="51;16;51" dur="5s" repeatCount="indefinite"/><animate attributeName="opacity" values=".15;.9;.15" dur="2s" repeatCount="indefinite"/></circle><circle cx="906" cy="134" r="3"><animate attributeName="cy" values="134;99;134" dur="6s" repeatCount="indefinite"/><animate attributeName="opacity" values=".15;.9;.15" dur="3s" repeatCount="indefinite"/></circle><circle cx="973" cy="217" r="4"><animate attributeName="cy" values="217;182;217" dur="7s" repeatCount="indefinite"/><animate attributeName="opacity" values=".15;.9;.15" dur="4s" repeatCount="indefinite"/></circle><circle cx="1040" cy="55" r="2"><animate attributeName="cy" values="55;20;55" dur="3s" repeatCount="indefinite"/><animate attributeName="opacity" values=".15;.9;.15" dur="5s" repeatCount="indefinite"/></circle><circle cx="1107" cy="138" r="3"><animate attributeName="cy" values="138;103;138" dur="4s" repeatCount="indefinite"/><animate attributeName="opacity" values=".15;.9;.15" dur="2s" repeatCount="indefinite"/></circle><circle cx="44" cy="221" r="4"><animate attributeName="cy" values="221;186;221" dur="5s" repeatCount="indefinite"/><animate attributeName="opacity" values=".15;.9;.15" dur="3s" repeatCount="indefinite"/></circle>
+</g>
+
+<!-- scanning laser -->
+<rect x="-20" y="0" width="8" height="320" fill="#00f0ff" opacity=".7" filter="url(#glow)">
+<animate attributeName="x" from="-20" to="1220" dur="4s" repeatCount="indefinite"/>
+</rect>
+
+<!-- terminal -->
+<rect x="300" y="42" width="600" height="235" rx="18" fill="#030712" fill-opacity=".91" stroke="url(#neon)" stroke-width="2"/>
+<circle cx="328" cy="68" r="6" fill="#ff5f56"/><circle cx="348" cy="68" r="6" fill="#ffbd2e"/><circle cx="368" cy="68" r="6" fill="#27c93f"/>
+<text x="395" y="73" fill="#64748b" font-family="monospace" font-size="13">SECURE_SHELL // VAIBHVENDRA</text>
+
+<text x="340" y="115" fill="#00f0ff" font-family="monospace" font-size="16">$ whoami</text>
+<text x="340" y="145" fill="#f8fafc" font-family="monospace" font-size="25" font-weight="700">cybersecurity_student</text>
+<text x="340" y="177" fill="#a855f7" font-family="monospace" font-size="15">$ cat skills.txt</text>
+<text x="340" y="203" fill="#94a3b8" font-family="monospace" font-size="14">Java • DSA • Linux • Networking • Security • AI/ML</text>
+<text x="340" y="232" fill="#27c93f" font-family="monospace" font-size="14">STATUS: ONLINE  |  SYSTEM: SECURE</text>
+<text x="340" y="258" fill="#00f0ff" font-family="monospace" font-size="14">$ build --future</text>
+<rect x="475" y="246" width="8" height="15" fill="#00f0ff"><animate attributeName="opacity" values="1;0;1" dur="0.8s" repeatCount="indefinite"/></rect>
+</svg>
