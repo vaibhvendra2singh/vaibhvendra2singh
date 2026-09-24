@@ -65,12 +65,7 @@ Cybersecurity student focused on **software development, Data Structures & Algor
 ## GitHub Analytics
 
 <p align="center">
-<img src="https://github-profile-summary-cards.vercel.app/api/cards/stats?username=vaibhvendra2singh&theme=github_dark" height="165"/>
-<img src="https://github-profile-summary-cards.vercel.app/api/cards/repos-per-language?username=vaibhvendra2singh&theme=github_dark" height="165"/>
-</p>
-
-<p align="center">
-<img src="https://streak-stats.demolab.com?user=vaibhvendra2singh&theme=tokyonight&hide_border=true"/>
+<img src="https://raw.githubusercontent.com/vaibhvendra2singh/vaibhvendra2singh/main/assets/github-analytics.svg" alt="GitHub Analytics" />
 </p>
 
 ---
