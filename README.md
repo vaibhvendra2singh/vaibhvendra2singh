@@ -1,3 +1,7 @@
+<p align="center">
+<img src="https://raw.githubusercontent.com/vaibhvendra2singh/vaibhvendra2singh/main/assets/profile-animation.svg" width="100%" alt="Animated cybersecurity background"/>
+</p>
+
 <div align="center">
 
 # Vaibhvendra Singh
