@@ -16,6 +16,9 @@ B.Tech in Cybersecurity at Bennett University, focused on software development, 
 <a href="https://leetcode.com/u/singh_2vaibhvendra/">
 <img src="https://img.shields.io/badge/LeetCode-FFA116?style=for-the-badge&logo=leetcode&logoColor=white">
 </a>
+<a href="https://www.naukri.com/code360/profile/vaibhvendra">
+<img src="https://img.shields.io/badge/Code360-View%20Profile-0A66C2?style=for-the-badge&logo=codingninjas&logoColor=white">
+</a>
 <a href="https://www.instagram.com/singh2_krishna/">
 <img src="https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white">
 </a>
@@ -82,6 +85,7 @@ Cybersecurity student focused on **software development, Data Structures & Algor
 <a href="https://github.com/vaibhvendra2singh">GitHub</a> ·
 <a href="https://www.linkedin.com/in/vaibhvendra-singh-302642322/">LinkedIn</a> ·
 <a href="https://leetcode.com/u/singh_2vaibhvendra/">LeetCode</a> ·
+<a href="https://www.naukri.com/code360/profile/vaibhvendra">Code360</a> ·
 <a href="https://www.instagram.com/singh2_krishna/">Instagram</a>
 </p>
 
