@@ -4,10 +4,6 @@
 
 <div align="center">
 
-# Vaibhvendra Singh
-
-### Cybersecurity Student · Software Developer · DSA Enthusiast
-
 B.Tech Cybersecurity student at Bennett University with a focus on **software engineering, Data Structures & Algorithms, cybersecurity, Linux, networking, and applied AI/ML**. Building strong foundations in problem solving, secure systems, and practical engineering.
 
 <p>
