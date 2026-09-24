@@ -77,11 +77,13 @@ Cybersecurity student focused on **software development, Data Structures & Algor
 
 ## Code360
 
+<!-- CODE360:START -->
 <p align="center">
 <a href="https://www.naukri.com/code360/profile/vaibhendra">
 <img src="https://img.shields.io/badge/Code360-View%20Profile-2F80ED?style=for-the-badge">
 </a>
 </p>
+<!-- CODE360:END -->
 
 ---
 
