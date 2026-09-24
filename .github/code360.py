@@ -1,30 +1,15 @@
 import html
+import os
 import re
-import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
+
+from playwright.sync_api import sync_playwright
 
 PROFILE_URL = "https://www.naukri.com/code360/profile/vaibhendra"
 START = "<!-- CODE360:START -->"
 END = "<!-- CODE360:END -->"
 SVG_PATH = Path("assets/code360-stats.svg")
-
-def fetch_reader():
-    reader_url = "https://r.jina.ai/" + PROFILE_URL
-    req = urllib.request.Request(
-        reader_url,
-        headers={
-            "User-Agent": "Mozilla/5.0",
-            "Accept": "text/plain",
-            "X-Engine": "browser",
-            "X-Respond-With": "text",
-            "X-Timeout": "30",
-        },
-    )
-    with urllib.request.urlopen(req, timeout=60) as response:
-        if response.status != 200:
-            raise RuntimeError(f"Jina Reader returned HTTP {response.status}")
-        return response.read().decode("utf-8", errors="replace")
 
 def extract(text, patterns):
     for pattern in patterns:
@@ -36,38 +21,75 @@ def extract(text, patterns):
                 pass
     return None
 
-text = fetch_reader()
+cookie = os.environ.get("CODE360_COOKIE", "").strip()
 
-stats = {
-    "submissions": extract(text, [
-        r"(\d[\d,]*)\s+Problem submissions",
-        r"Problem submissions\s*[:\-]?\s*(\d[\d,]*)",
-    ]),
-    "coding": extract(text, [
-        r"Coding\s*\((\d[\d,]*)\)",
-        r"Coding\s*[:\-]?\s*(\d[\d,]*)",
-    ]),
-    "mcq": extract(text, [
-        r"MCQ\s*\((\d[\d,]*)\)",
-        r"MCQ\s*[:\-]?\s*(\d[\d,]*)",
-    ]),
-    "current_streak": extract(text, [
-        r"Current streak\s*:\s*(\d[\d,]*)\s*days?",
-        r"Current streak\s*[:\-]?\s*(\d[\d,]*)",
-    ]),
-    "longest_streak": extract(text, [
-        r"Longest streak\s*:\s*(\d[\d,]*)\s*days?",
-        r"Longest streak\s*[:\-]?\s*(\d[\d,]*)",
-    ]),
-}
+with sync_playwright() as p:
+    browser = p.chromium.launch(headless=True)
 
-print("Code360 Reader response length:", len(text))
-print("Code360 stats:", stats)
+    context_args = {
+        "viewport": {"width": 1440, "height": 1800},
+        "user_agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/153.0.0.0 Safari/537.36"
+        ),
+        "locale": "en-US",
+    }
+
+    if cookie:
+        context_args["extra_http_headers"] = {"Cookie": cookie}
+
+    context = browser.new_context(**context_args)
+    page = context.new_page()
+
+    page.goto(PROFILE_URL, wait_until="domcontentloaded", timeout=120000)
+    page.wait_for_timeout(12000)
+
+    # Force lazy-loaded profile sections to render.
+    for _ in range(5):
+        page.mouse.wheel(0, 1500)
+        page.wait_for_timeout(1000)
+
+    body_text = page.locator("body").inner_text()
+    page_title = page.title()
+
+    stats = {
+        "submissions": extract(body_text, [
+            r"(\d[\d,]*)\s+Problem submissions",
+            r"Problem submissions\s*[:\-]?\s*(\d[\d,]*)",
+        ]),
+        "coding": extract(body_text, [
+            r"Coding\s*\((\d[\d,]*)\)",
+            r"Coding\s*[:\-]?\s*(\d[\d,]*)",
+        ]),
+        "mcq": extract(body_text, [
+            r"MCQ\s*\((\d[\d,]*)\)",
+            r"MCQ\s*[:\-]?\s*(\d[\d,]*)",
+        ]),
+        "current_streak": extract(body_text, [
+            r"Current streak\s*:\s*(\d[\d,]*)\s*days?",
+            r"Current streak\s*[:\-]?\s*(\d[\d,]*)",
+        ]),
+        "longest_streak": extract(body_text, [
+            r"Longest streak\s*:\s*(\d[\d,]*)\s*days?",
+            r"Longest streak\s*[:\-]?\s*(\d[\d,]*)",
+        ]),
+    }
+
+    browser.close()
+
+print(f"Code360 page title: {page_title}")
+print(f"Code360 stats: {stats}")
 
 if all(value is None for value in stats.values()):
-    print("Reader response preview:")
-    print(text[:5000])
-    raise RuntimeError("Code360 statistics were not found in Reader output.")
+    if "Access Denied" in page_title or "Access Denied" in body_text:
+        if not cookie:
+            raise RuntimeError(
+                "Code360 blocks GitHub Actions. Add a CODE360_COOKIE repository secret "
+                "from your logged-in Code360 browser session."
+            )
+        raise RuntimeError("Code360 still blocks the supplied browser session cookie.")
+    raise RuntimeError("Code360 statistics were not found on the profile page.")
 
 for key, value in stats.items():
     if value is None:
@@ -129,4 +151,4 @@ if not re.search(pattern, readme, re.DOTALL):
 readme = re.sub(pattern, section.strip(), readme, count=1, flags=re.DOTALL)
 readme_path.write_text(readme, encoding="utf-8")
 
-print("Code360 README updated successfully.")
+print("Code360 README and stats image updated successfully.")
