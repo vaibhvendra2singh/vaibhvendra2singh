@@ -27,7 +27,7 @@ B.Tech in Cybersecurity at Bennett University, focused on software development, 
 
 ## About
 
-Cybersecurity student focused on **software development, Data Structures & Algorithms, Linux, networking, system security, and AI/ML**. Currently strengthening problem-solving skills through consistent DSA practice while developing practical knowledge in cybersecurity and modern computing systems.
+Cybersecurity student focused on **software development, Data Structures & Algorithms, Linux, networking, system security, and AI/ML**.
 
 ---
 
@@ -71,6 +71,16 @@ Cybersecurity student focused on **software development, Data Structures & Algor
 
 <p align="center">
 <img src="https://streak-stats.demolab.com?user=vaibhvendra2singh&theme=tokyonight&hide_border=true"/>
+</p>
+
+---
+
+## Code360
+
+<p align="center">
+<a href="https://www.naukri.com/code360/profile/vaibhendra">
+<img src="https://img.shields.io/badge/Code360-View%20Profile-2F80ED?style=for-the-badge">
+</a>
 </p>
 
 ---
