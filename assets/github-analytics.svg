@@ -9,7 +9,7 @@
 
 <rect x="325" y="100" width="250" height="85" rx="12" fill="#0d1117" stroke="#30363d"/>
 <text x="345" y="128" fill="#8b949e" font-family="Arial, sans-serif" font-size="13">Current streak</text>
-<text x="345" y="162" fill="#f0f6fc" font-family="Arial, sans-serif" font-size="30" font-weight="700">1 days</text>
+<text x="345" y="162" fill="#f0f6fc" font-family="Arial, sans-serif" font-size="30" font-weight="700">0 days</text>
 
 <rect x="610" y="100" width="250" height="85" rx="12" fill="#0d1117" stroke="#30363d"/>
 <text x="630" y="128" fill="#8b949e" font-family="Arial, sans-serif" font-size="13">Longest streak</text>
@@ -24,5 +24,5 @@
 <text x="400" y="220" fill="#8b949e" font-family="Arial, sans-serif" font-size="13">Top languages by repository</text>
 <text x="400" y="250" fill="#f0f6fc" font-family="Arial, sans-serif" font-size="15">TypeScript (6) · Python (1) · HTML (1) · CSS (1)</text>
 
-<text x="40" y="286" fill="#6e7681" font-family="Arial, sans-serif" font-size="11">Updated: 2026-09-24</text>
+<text x="40" y="286" fill="#6e7681" font-family="Arial, sans-serif" font-size="11">Updated: 2026-09-25</text>
 </svg>
