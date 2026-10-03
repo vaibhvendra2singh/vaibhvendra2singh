@@ -13,7 +13,7 @@ B.Tech Cybersecurity student at Bennett University with a focus on **software en
 <a href="https://www.linkedin.com/in/vaibhvendra-singh-302642322/">
 <img src="https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white">
 </a>
-<a href="https://leetcode.com/u/singh_2vaibhvendra/">
+<a href="https://leetcode.com/u/singh2_vaibhvendra/">
 <img src="https://img.shields.io/badge/LeetCode-FFA116?style=for-the-badge&logo=leetcode&logoColor=white">
 </a>
 <a href="https://www.naukri.com/code360/profile/vaibhvendra">
@@ -54,7 +54,7 @@ Cybersecurity student focused on **software engineering, Data Structures & Algor
 **Focus:** Arrays · Hashing · Two Pointers · Binary Search · Linked Lists · Recursion · Sorting · Trees · Graphs · Greedy · Dynamic Programming
 
 <p align="center">
-<a href="https://leetcode.com/u/singh_2vaibhvendra/">
+<a href="https://leetcode.com/u/singh2_vaibhvendra/">
 <img src="https://img.shields.io/badge/LeetCode-View%20Profile-FFA116?style=for-the-badge&logo=leetcode&logoColor=white">
 </a>
 </p>
@@ -64,7 +64,7 @@ Cybersecurity student focused on **software engineering, Data Structures & Algor
 ## LeetCode
 
 <p align="center">
-<img src="https://leetcard.jacoblin.cool/singh_2vaibhvendra?theme=dark&font=Karma&ext=heatmap" />
+<img src="https://leetcard.jacoblin.cool/singh2_vaibhvendra?theme=dark&font=Karma&ext=heatmap" />
 </p>
 
 ---
@@ -86,7 +86,7 @@ Cybersecurity student focused on **software engineering, Data Structures & Algor
 ## Coding Profiles
 
 <p align="center">
-<a href="https://leetcode.com/u/singh_2vaibhvendra/">
+<a href="https://leetcode.com/u/singh2_vaibhvendra/">
 <img src="https://img.shields.io/badge/LeetCode-Profile-FFA116?style=for-the-badge&logo=leetcode&logoColor=white">
 </a>
 <a href="https://www.naukri.com/code360/profile/vaibhvendra">
@@ -101,7 +101,7 @@ Cybersecurity student focused on **software engineering, Data Structures & Algor
 <p align="center">
 <a href="https://github.com/vaibhvendra2singh">GitHub</a> ·
 <a href="https://www.linkedin.com/in/vaibhvendra-singh-302642322/">LinkedIn</a> ·
-<a href="https://leetcode.com/u/singh_2vaibhvendra/">LeetCode</a> ·
+<a href="https://leetcode.com/u/singh2_vaibhvendra/">LeetCode</a> ·
 <a href="https://www.naukri.com/code360/profile/vaibhvendra">Code360</a>
 </p>
 
